@@ -46,7 +46,7 @@ class DataBaseCreate(AbstractDataBase):
     def create_table(self, table_name, table_structure):
         """Метод создания таблицы в БД"""
         try:
-            query = f"CREATE TABLE {table_name}({table_structure})"
+            query = f"CREATE TABLE IF NOT EXISTS {table_name}({table_structure})"
             self.open()
             self.__cursor.execute(query)
         except Exception as e:
@@ -57,9 +57,9 @@ class DataBaseCreate(AbstractDataBase):
     def insert(self, table, values):
         """Метод записи данных в таблицу БД"""
         try:
-            query = f"INSERT INTO {table} VALUES ({values})"
+            query = f"INSERT INTO {table} VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
             self.open()
-            self.__cursor.execute(query)
+            self.__cursor.executemany(query, values)
         except Exception as e:
             print(f"Ошибка записи данных в таблицу: {e}")
         finally:
