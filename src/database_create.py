@@ -10,8 +10,8 @@ class DataBaseCreate(AbstractDataBase):
         self.__connection = None
         self.__cursor = None
 
-    def __repr__(self):
-        return f"DataBase: {self.database}"
+    def __str__(self):
+        return f"База данных: {self.database}"
 
     def open(self):
         """Открытие соединения с сервером PostgreSQL."""
@@ -20,6 +20,7 @@ class DataBaseCreate(AbstractDataBase):
                 host=self.host,
                 user=self.user,
                 password=self.password,
+                database=self.database,
                 port=self.port
             )
             self.__connection.autocommit = True
@@ -33,11 +34,15 @@ class DataBaseCreate(AbstractDataBase):
         self.__connection.close()
 
     def create_database(self, database):
-        """Метод создания базы данных"""
+        """Метод создания БД"""
         try:
+            query_non_db = f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s;"
             query = f"CREATE DATABASE {database}"
             self.open()
-            self.__cursor.execute(query)
+            self.__cursor.execute(query_non_db, [database])
+            exists = self.__cursor.fetchone()
+            if not exists:
+                self.__cursor.execute(query)
         except Exception as e:
             print(f"Ошибка при создании базы данных: {e}")
         finally:
