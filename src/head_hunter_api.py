@@ -1,8 +1,7 @@
 import requests
-from src.abs_classes import AbstractAPI
 
 
-class HHVacancyAPI(AbstractAPI):
+class HHVacancyAPI:
     """Класс API запроса для получения данных о вакансиях на сайте hh.ru """
     __base_url = "https://api.hh.ru/vacancies"
     __area_url = "https://api.hh.ru/areas"
@@ -18,9 +17,10 @@ class HHVacancyAPI(AbstractAPI):
             print("Ошибка при получении данных: ", response.status_code)
             return []
 
-    def get_area_id(self, user_area):
+    @staticmethod
+    def get_area_id(user_area):
         """Метод получения id населенного пункта"""
-        response = requests.get(self.__area_url)
+        response = requests.get(HHVacancyAPI.__area_url)
         if response.status_code == 200:
             data_list = response.json()
             for regions in data_list:
