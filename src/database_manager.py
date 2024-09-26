@@ -4,17 +4,14 @@ import psycopg2
 class DBManager:
     """Класс-менеджер для работы с БД PostgreSQL."""
 
-    def __init__(self, host='localhost', user='postgres', password='Q1980qum%', database='postgres', port='5432'):
+    def __init__(self, host="localhost", user="postgres", password="Q1980qum%", database="postgres", port="5432"):
         self.__connection_params = {
-            'host': host,
-            'user': user,
-            'password': password,
-            'database': database,
-            'port': port
+            "host": host,
+            "user": user,
+            "password": password,
+            "database": database,
+            "port": port,
         }
-
-    def __str__(self):
-        return f"База данных: {self.__connection_params['database']}"
 
     def __execute_query(self, query):
         try:
@@ -27,33 +24,37 @@ class DBManager:
 
     def get_companies_and_vacancies_count(self):
         """Метод получения списка всех компаний и количества вакансий у каждой компании."""
-        return self.__execute_query("SELECT employer_name, COUNT(*) "
-                                    "FROM vacancies "
-                                    "GROUP BY employer_name "
-                                    "ORDER BY COUNT(*) DESC")
+        return self.__execute_query(
+            "SELECT employer_name, COUNT(*) " 
+            "FROM vacancies " 
+            "GROUP BY employer_name " 
+            "ORDER BY COUNT(*) DESC")
 
     def get_all_vacancies(self):
         """Метод получения списка всех вакансий с указанием названия компании,
-         названия вакансии, зарплаты и ссылки на вакансию."""
-        return self.__execute_query("SELECT employer_name, vacancy_name, salary_from, salary_to, vacancy_url "
-                                    "FROM vacancies")
+        названия вакансии, зарплаты и ссылки на вакансию."""
+        return self.__execute_query(
+            "SELECT employer_name, vacancy_name, salary_from, salary_to, vacancy_url " 
+            "FROM vacancies")
 
     def get_avg_salary(self):
         """Метод получения средней зарплаты по вакансиям."""
-        return self.__execute_query("SELECT AVG((salary_from + salary_to) / 2) "
-                                    "FROM vacancies")
+        return (self.__execute_query("SELECT AVG((salary_from + salary_to) / 2) " 
+                                     "FROM vacancies"))[0]
 
     def get_vacancies_with_higher_salary(self):
         """Метод получения списка всех вакансий, у которых зарплата выше средней по всем вакансиям."""
-        return self.__execute_query("SELECT * "
-                                    "FROM vacancies "
-                                    "WHERE (salary_from + salary_to) / 2 > (SELECT AVG((salary_from + salary_to) / 2) "
-                                    "FROM vacancies) "
-                                    "ORDER BY salary_to DESC")
+        return self.__execute_query(
+            "SELECT * "
+            "FROM vacancies "
+            "WHERE (salary_from + salary_to) / 2 > (SELECT AVG((salary_from + salary_to) / 2) "
+            "FROM vacancies) "
+            "ORDER BY salary_to DESC"
+        )
 
     def get_vacancies_with_keyword(self, key_words):
         """Метод получения списка всех вакансий, в названии которых содержатся переданные в метод слова"""
-        return self.__execute_query(f"SELECT * "
-                                    f"FROM vacancies "
-                                    f"WHERE vacancy_name "
+        return self.__execute_query(f"SELECT * " 
+                                    "FROM vacancies " 
+                                    "WHERE vacancy_name " 
                                     f"LIKE '%{key_words}%'")

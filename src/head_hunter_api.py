@@ -2,14 +2,20 @@ import requests
 
 
 class HHVacancyAPI:
-    """Класс API запроса для получения данных о вакансиях на сайте hh.ru """
+    """Класс API запроса для получения данных о вакансиях на сайте hh.ru"""
+
     __base_url = "https://api.hh.ru/vacancies"
     __area_url = "https://api.hh.ru/areas"
 
-    def get_data(self, search_query='', area_id=None, page=0, per_page=100, employer_id=None):
+    def get_data(self, search_query="", area_id=None, page=0, per_page=100, employer_id=None):
         """Метод прлучения данных о вакнсиях"""
-        params = {"text": f"NAME:{search_query}", "area": area_id, "page": page, "per_page": per_page,
-                  "employer_id": employer_id}
+        params = {
+            "text": f"NAME:{search_query}",
+            "area": area_id,
+            "page": page,
+            "per_page": per_page,
+            "employer_id": employer_id,
+        }
         response = requests.get(self.__base_url, params=params)
         if response.status_code == 200:
             return response.json()["items"]

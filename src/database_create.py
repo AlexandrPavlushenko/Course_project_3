@@ -1,20 +1,22 @@
+# -*- coding: utf-8 -*-
+
 import psycopg2
 
 
 class DataBaseCreate:
     """Класс для создания БД и таблиц в PostgreSQL"""
 
-    def __init__(self, host='localhost', user='postgres', password='Q1980qum%', database='postgres', port='5432'):
+    def __init__(self, host="localhost", user="postgres", password="Q1980qum%",
+                 database="postgres", port="5432"):
         self.__connection_params = {
-            'host': host,
-            'user': user,
-            'password': password,
-            'database': database,
-            'port': port
+            "host": host,
+            "user": user,
+            "password": password,
+            "database": database,
+            "port": port,
         }
-
-    def __str__(self):
-        return f"База данных: {self.__connection_params['database']}"
+        self.__connection = None
+        self.__cursor = None
 
     def __open(self):
         try:
@@ -25,13 +27,15 @@ class DataBaseCreate:
             print(f"Ошибка при открытии соединения: {e}")
 
     def __close(self):
-        self.__cursor.close()
-        self.__connection.close()
+        if self.__cursor:
+            self.__cursor.close()
+        if self.__connection:
+            self.__connection.close()
 
     def create_database(self, database):
         """Метод создания БД"""
         try:
-            query_non_db = f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s"
+            query_non_db = "SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s"
             query = f"CREATE DATABASE {database};"
             self.__open()
             self.__cursor.execute(query_non_db, [database])
