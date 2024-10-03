@@ -11,21 +11,26 @@ def main():
     db = DataBaseCreate()
     db.create_database("head_hunter")
 
-    # Создаем в БД таблицу для вакансий
+    # Создаем в БД таблицу для работодателей
     db = DataBaseCreate(database="head_hunter")
+    db.create_table("employers", "employer_id INT, employer_name TEXT, employer_url CHAR(31),"
+                                 "open_vacancies INT")
+
+    # Создаем в БД таблицу для вакансий
     db.create_table("vacancies", "vacancy_id INT, vacancy_name TEXT, area VARCHAR(100),"
                                  "salary_from INT, salary_to INT,employer_id INT, employer_name TEXT,"
                                  "vacancy_url CHAR(31), published_date DATE")
 
-    # Получаем данные с hh.ru и записываем их в таблицу БД
+    # Получаем данные с hh.ru и записываем их в таблицы БД
+    id_employers = [11481151, 783222, 10842295, 11444595, 10748139, 972961, 253771, 701365, 11482656, 5345596]
     hh_api = HHVacancyAPI()
     vacancies_list = []
     quantity_page = 1  # Количество страниц (Каждая страница содержит 100 вакансий)
     read_bar_format = "%s{l_bar}%s{bar}" % (
         "\033[0;32m", "\033[0;32m")
-    for page in tqdm(range(quantity_page), desc="Загрузка вакансий в базу данных...", colour="green",
+    for emp in tqdm(id_employers, desc="Загрузка вакансий в базу данных...", colour="green",
                      bar_format=read_bar_format):
-        vacancies = hh_api.get_data(search_query="Разработчик", area_id=1, page=page, per_page=100)
+        vacancies = hh_api.get_data(emp)
         for i in vacancies:
             if i['salary'] is None:
                 salary_from = salary_to = None

@@ -6,19 +6,23 @@ class HHVacancyAPI:
 
     __base_url = "https://api.hh.ru/vacancies"
     __area_url = "https://api.hh.ru/areas"
+    __employers_url = "https://api.hh.ru/employers"
 
-    def get_data(self, search_query="", area_id=None, page=0, per_page=100, employer_id=None):
+    def get_data(self, employer_id):
         """Метод прлучения данных о вакнсиях"""
-        params = {
-            "text": f"NAME:{search_query}",
-            "area": area_id,
-            "page": page,
-            "per_page": per_page,
-            "employer_id": employer_id,
-        }
+        params = {"employer_id": employer_id}
         response = requests.get(self.__base_url, params=params)
         if response.status_code == 200:
             return response.json()["items"]
+        else:
+            print("Ошибка при получении данных: ", response.status_code)
+            return []
+
+    def get_employer(self, id_employer):
+        """Метод получения данных о работодателях"""
+        response = requests.get(f"{self.__employers_url}/{id_employer}")
+        if response.status_code == 200:
+            return response.json()
         else:
             print("Ошибка при получении данных: ", response.status_code)
             return []
