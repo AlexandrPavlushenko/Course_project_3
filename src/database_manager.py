@@ -24,23 +24,20 @@ class DBManager:
 
     def get_companies_and_vacancies_count(self):
         """Метод получения списка всех компаний и количества вакансий у каждой компании."""
-        return self.__execute_query(
-            "SELECT employer_name, COUNT(*) " 
-            "FROM vacancies " 
-            "GROUP BY employer_name " 
-            "ORDER BY COUNT(*) DESC")
+        return self.__execute_query("SELECT employer_name, open_vacancies " "FROM employers")
 
     def get_all_vacancies(self):
         """Метод получения списка всех вакансий с указанием названия компании,
         названия вакансии, зарплаты и ссылки на вакансию."""
         return self.__execute_query(
-            "SELECT employer_name, vacancy_name, salary_from, salary_to, vacancy_url " 
-            "FROM vacancies")
+            "SELECT e.employer_name, v.vacancy_name, v.salary_from, v.salary_to, v.vacancy_url "
+            "FROM vacancies v "
+            "INNER JOIN employers e ON v.employer_id = e.employer_id"
+        )
 
     def get_avg_salary(self):
         """Метод получения средней зарплаты по вакансиям."""
-        return (self.__execute_query("SELECT AVG((salary_from + salary_to) / 2) " 
-                                     "FROM vacancies"))[0]
+        return (self.__execute_query("SELECT AVG((salary_from + salary_to) / 2) " "FROM vacancies"))[0]
 
     def get_vacancies_with_higher_salary(self):
         """Метод получения списка всех вакансий, у которых зарплата выше средней по всем вакансиям."""
@@ -54,7 +51,4 @@ class DBManager:
 
     def get_vacancies_with_keyword(self, key_words):
         """Метод получения списка всех вакансий, в названии которых содержатся переданные в метод слова"""
-        return self.__execute_query(f"SELECT * " 
-                                    "FROM vacancies " 
-                                    "WHERE vacancy_name " 
-                                    f"LIKE '%{key_words}%'")
+        return self.__execute_query(f"SELECT * " "FROM vacancies " "WHERE vacancy_name " f"LIKE '%{key_words}%'")

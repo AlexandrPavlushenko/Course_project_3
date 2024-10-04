@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
-
 import psycopg2
 
 
 class DataBaseCreate:
     """Класс для создания БД и таблиц в PostgreSQL"""
 
-    def __init__(self, host="localhost", user="postgres", password="Q1980qum%",
-                 database="postgres", port="5432"):
+    def __init__(self, host="localhost", user="postgres", password="Q1980qum%", database="postgres", port="5432"):
         self.__connection_params = {
             "host": host,
             "user": user,
@@ -60,8 +57,12 @@ class DataBaseCreate:
 
     def insert(self, table, values):
         """Метод записи данных в таблицу БД"""
+        query = ""
         try:
-            query = f"INSERT INTO {table} VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            if len(values[0]) == 8:
+                query = f"INSERT INTO {table} VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            elif len(values[0]) == 4:
+                query = f"INSERT INTO {table} VALUES (%s, %s, %s, %s)"
             self.__open()
             self.__cursor.executemany(query, values)
         except Exception as e:
@@ -86,7 +87,7 @@ class DataBaseCreate:
     def clear_table(self, table):
         """Метод полного удаления данных из таблицы БД"""
         try:
-            query = f"DELETE FROM {table};"
+            query = f"TRUNCATE TABLE {table}"
             self.__open()
             self.__cursor.execute(query)
         except Exception as e:

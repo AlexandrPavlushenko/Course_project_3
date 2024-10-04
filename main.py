@@ -13,24 +13,36 @@ def main():
 
     # Создаем в БД таблицу для работодателей
     db = DataBaseCreate(database="head_hunter")
-    db.create_table("employers", "employer_id INT, employer_name TEXT, employer_url CHAR(31),"
-                                 "open_vacancies INT")
+    db.create_table("employers", "employer_id INT PRIMARY KEY, employer_name TEXT,"
+                                 "employer_url VARCHAR(31), open_vacancies INT")
 
     # Создаем в БД таблицу для вакансий
-    db.create_table("vacancies", "vacancy_id INT, vacancy_name TEXT, area VARCHAR(100),"
-                                 "salary_from INT, salary_to INT,employer_id INT, employer_name TEXT,"
-                                 "vacancy_url CHAR(31), published_date DATE")
+    db.create_table("vacancies", "vacancy_id INT PRIMARY KEY, vacancy_name TEXT,"
+                                 "area VARCHAR(255), salary_from INT, salary_to INT, employer_id INT,"
+                                 "vacancy_url VARCHAR(31), published_date DATE,"
+                                 "FOREIGN KEY (employer_id) REFERENCES employers(employer_id) ON DELETE CASCADE")
 
     # Получаем данные с hh.ru и записываем их в таблицы БД
     id_employers = [11481151, 783222, 10842295, 11444595, 10748139, 972961, 253771, 701365, 11482656, 5345596]
     hh_api = HHVacancyAPI()
+    employers_list = []
     vacancies_list = []
-    quantity_page = 1  # Количество страниц (Каждая страница содержит 100 вакансий)
+
     read_bar_format = "%s{l_bar}%s{bar}" % (
         "\033[0;32m", "\033[0;32m")
-    for emp in tqdm(id_employers, desc="Загрузка вакансий в базу данных...", colour="green",
-                     bar_format=read_bar_format):
-        vacancies = hh_api.get_data(emp)
+
+    for emp in tqdm(id_employers, desc="Загрузка таблицы работодателей в базу данных...", colour="green",
+                    bar_format=read_bar_format):
+        empl = hh_api.get_employer(emp)
+        employers_list.append((empl['id'], empl['name'], empl['alternate_url'], empl['open_vacancies']))
+    db.clear_table("employers")
+    db.insert("employers", employers_list)
+
+    read_bar_format = "%s{l_bar}%s{bar}" % (
+        "\033[0;32m", "\033[0;32m")
+    for vac in tqdm(id_employers, desc="Загрузка таблицы вакансий в базу данных...", colour="green",
+                    bar_format=read_bar_format):
+        vacancies = hh_api.get_data(vac)
         for i in vacancies:
             if i['salary'] is None:
                 salary_from = salary_to = None
@@ -46,7 +58,7 @@ def main():
             pub_date = i['published_at'][:10]
             vacancies_list.append(
                 (i['id'], i['name'], i['area']['name'], salary_from, salary_to, i['employer'].get('id', None),
-                 i['employer']['name'], i['alternate_url'], pub_date))
+                 i['alternate_url'], pub_date))
     db.clear_table("vacancies")
     db.insert("vacancies", vacancies_list)
 
@@ -88,18 +100,18 @@ def main():
             table = PrettyTable()
             table.field_names = [f"{Fore.GREEN}{name}{Style.RESET_ALL}" for name in
                                  ["id вакансии", "Название вакансии", "Населенный пункт", "Зарплата от", "Зарплата до",
-                                  "id компании", "Название компании", "Ссылка на вакансию", "Дата публикации"]]
+                                  "id компании", "Ссылка на вакансию", "Дата публикации"]]
             for row in dbm.get_vacancies_with_higher_salary():
-                table.add_row([row[i] for i in range(9)])
+                table.add_row([row[i] for i in range(8)])
             print(table)
         elif choice == '5':
-            key_word = input("Введите ключевое слово: ")
+            key_word = input("Введите ключевое слово.Внимание! Регистр букв важен! : ")
             table = PrettyTable()
             table.field_names = [f"{Fore.GREEN}{name}{Style.RESET_ALL}" for name in
                                  ["id вакансии", "Название вакансии", "Населенный пункт", "Зарплата от", "Зарплата до",
-                                  "id компании", "Название компании", "Ссылка на вакансию", "Дата публикации"]]
+                                  "id компании", "Ссылка на вакансию", "Дата публикации"]]
             for row in dbm.get_vacancies_with_keyword(key_word):
-                table.add_row([row[i] for i in range(9)])
+                table.add_row([row[i] for i in range(8)])
             print(table)
 
 
