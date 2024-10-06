@@ -19,14 +19,16 @@ def main():
     # Создаем в БД таблицу для вакансий
     db.create_table("vacancies", "vacancy_id INT PRIMARY KEY, vacancy_name TEXT,"
                                  "area VARCHAR(255), salary_from INT, salary_to INT, employer_id INT,"
-                                 "vacancy_url VARCHAR(31), published_date DATE,"
-                                 "FOREIGN KEY (employer_id) REFERENCES employers(employer_id) ON DELETE CASCADE")
+                                 "vacancy_url VARCHAR(31), published_date DATE")
 
     # Получаем данные с hh.ru и записываем их в таблицы БД
     id_employers = [11481151, 783222, 10842295, 11444595, 10748139, 972961, 253771, 701365, 11482656, 5345596]
     hh_api = HHVacancyAPI()
     employers_list = []
     vacancies_list = []
+
+    db.clear_table("employers")
+    db.clear_table("vacancies")
 
     read_bar_format = "%s{l_bar}%s{bar}" % (
         "\033[0;32m", "\033[0;32m")
@@ -35,7 +37,7 @@ def main():
                     bar_format=read_bar_format):
         empl = hh_api.get_employer(emp)
         employers_list.append((empl['id'], empl['name'], empl['alternate_url'], empl['open_vacancies']))
-    db.clear_table("employers")
+
     db.insert("employers", employers_list)
 
     read_bar_format = "%s{l_bar}%s{bar}" % (
@@ -59,7 +61,7 @@ def main():
             vacancies_list.append(
                 (i['id'], i['name'], i['area']['name'], salary_from, salary_to, i['employer'].get('id', None),
                  i['alternate_url'], pub_date))
-    db.clear_table("vacancies")
+
     db.insert("vacancies", vacancies_list)
 
     # Главное меню
